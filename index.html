@@ -113,12 +113,14 @@
         // --- DATA SETUP ---
         const prodiLabels = ['Adm. Bisnis', 'Akuntansi', 'DKV', 'Ilmu Komunikasi', 'Informatika', 'ICT Business', 'Sistem Informasi', 'Teknik Elektro', 'Teknik Industri', 'Teknik Telekomunikasi'];
         
-        const dataJabatan = { 'GB/LK': [4, 2, 0, 3, 5, 11, 2, 3, 3, 4], 'Lektor': [11, 16, 8, 11, 9, 13, 5, 7, 9, 14], 'Asisten Ahli': [3, 4, 7, 5, 7, 3, 9, 3, 2, 3], 'NJFA': [10, 2, 6, 6, 7, 2, 8, 4, 5, 7] };
-        const dataGelar = { 'S1': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 'S2': [13, 17, 16, 17, 11, 7, 19, 6, 6, 14], 'S3': [15, 7, 5, 8, 17, 22, 5, 11, 13, 14] };
+        // DATA JABATAN DIPERBARUI: GB/LK DIPISAH
+        const dataJabatan = { 'Guru Besar': [0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 'Lektor Kepala': [4, 2, 0, 3, 4, 10, 2, 3, 3, 4], 'Lektor': [11, 16, 8, 11, 9, 13, 5, 7, 9, 14], 'Asisten Ahli': [3, 4, 7, 5, 7, 3, 9, 3, 2, 3], 'NJFA': [10, 2, 6, 6, 7, 2, 8, 4, 5, 7] };
+        const dataGelar = { 'S2': [13, 17, 16, 17, 11, 7, 19, 6, 6, 14], 'S3': [15, 7, 5, 8, 17, 22, 5, 11, 13, 14] };
         const dataMahasiswa = { '2018': [0, 0, 0, 1, 0, 1, 0, 0, 0, 0], '2019': [0, 0, 0, 0, 3, 5, 2, 1, 0, 0], '2020': [0, 0, 3, 5, 2, 10, 1, 0, 1, 0], '2021': [5, 7, 18, 23, 17, 30, 6, 7, 5, 7], '2022': [30, 13, 16, 29, 31, 81, 29, 16, 23, 22], '2023': [19, 11, 17, 21, 28, 68, 25, 12, 15, 13], '2024': [30, 25, 20, 32, 34, 59, 33, 14, 34, 10] };
 
-        const colorsJabatan = { 'GB/LK': '#ef4444', 'Lektor': '#f97316', 'Asisten Ahli': '#84cc16', 'NJFA': '#3b82f6' };
-        const colorsGelar = { 'S1': '#ffcd56', 'S2': '#36a2eb', 'S3': '#4bc0c0' };
+        // WARNA JABATAN DIPERBARUI
+        const colorsJabatan = { 'Guru Besar': '#991b1b', 'Lektor Kepala': '#ef4444', 'Lektor': '#f97316', 'Asisten Ahli': '#84cc16', 'NJFA': '#3b82f6' };
+        const colorsGelar = { 'S2': '#36a2eb', 'S3': '#4bc0c0' };
         const colorsMahasiswa = { '2018': '#fde047', '2019': '#f97316', '2020': '#ef4444', '2021': '#84cc16', '2022': '#22c55e', '2023': '#3b82f6', '2024': '#8b5cf6' };
         
         // --- DOM ELEMENTS ---
@@ -271,7 +273,7 @@
                         <div class="flex justify-center items-center flex-wrap gap-x-6 sm:gap-x-8 gap-y-4">`;
             
             categoryLabels.forEach(label => {
-                const id = label.toLowerCase().replace(/\s/g, '-').replace('/', '-'); // Handle slash in GB/LK
+                const id = label.toLowerCase().replace(/\s/g, '-').replace('/', '-');
                 html += `<div class="flex flex-col items-center">
                             <label for="${id}-color-picker" class="font-semibold text-gray-700 dark:text-gray-300 mb-2">${label}</label>
                             <input type="color" id="${id}-color-picker" class="color-picker-input" data-label="${label}" value="${colors[label]}">
