@@ -32,6 +32,11 @@
             border-radius: 50%;
             border: 2px solid #e2e8f0;
         }
+        /* Style untuk tombol filter aktif */
+        .filter-btn.active {
+            background-color: #3b82f6; /* bg-blue-600 */
+            color: #ffffff; /* text-white */
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 md:p-8">
@@ -40,6 +45,12 @@
         <div class="mb-8 text-center">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Dasbor Dosen Kelas Internasional</h1>
             <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">Tahun Akademik 2024-2025</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="mb-8 flex justify-center items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1 max-w-md mx-auto">
+            <button id="btn-jabatan" class="filter-btn w-1/2 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Berdasarkan Jabatan</button>
+            <button id="btn-gelar" class="filter-btn w-1/2 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Berdasarkan Pendidikan</button>
         </div>
 
         <!-- Summary Cards -->
@@ -53,45 +64,28 @@
                 <p id="top-prodi" class="text-2xl text-center font-bold text-blue-600 dark:text-blue-400 mt-2">-</p>
             </div>
              <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md flex flex-col justify-center items-center">
-                <h3 class="text-gray-500 dark:text-gray-400 font-semibold text-lg">Gelar Paling Umum</h3>
-                <p id="top-gelar" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">-</p>
+                <h3 id="top-category-title" class="text-gray-500 dark:text-gray-400 font-semibold text-lg">Kategori Paling Umum</h3>
+                <p id="top-category" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">-</p>
             </div>
         </div>
 
         <!-- Color Customization -->
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md mb-8">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Kustomisasi Warna Grafik</h3>
-            <div class="flex justify-center items-center gap-x-8 sm:gap-x-12">
-                <div class="flex flex-col items-center">
-                    <label for="s1-color-picker" class="font-semibold text-gray-700 dark:text-gray-300 mb-2">S1</label>
-                    <input type="color" id="s1-color-picker" class="color-picker-input">
-                </div>
-                <div class="flex flex-col items-center">
-                    <label for="s2-color-picker" class="font-semibold text-gray-700 dark:text-gray-300 mb-2">S2</label>
-                    <input type="color" id="s2-color-picker" class="color-picker-input">
-                </div>
-                <div class="flex flex-col items-center">
-                    <label for="s3-color-picker" class="font-semibold text-gray-700 dark:text-gray-300 mb-2">S3</label>
-                    <input type="color" id="s3-color-picker" class="color-picker-input">
-                </div>
-            </div>
+        <div id="color-customization-container" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md mb-8">
+            <!-- Konten diisi oleh JavaScript -->
         </div>
 
         <!-- Main Charts Area -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Stacked Bar Chart -->
             <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
-                <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Komposisi Dosen per Program Studi (Gelar)</h2>
+                <h2 id="bar-chart-title" class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Komposisi Dosen</h2>
                 <div class="relative h-[500px]">
-                    <canvas id="lecturerCompositionChart"></canvas>
+                    <canvas id="compositionChart"></canvas>
                 </div>
             </div>
-
-            <!-- Pie Chart -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
-                 <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Distribusi Gelar Pendidikan</h2>
+                 <h2 id="pie-chart-title" class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Distribusi Dosen</h2>
                 <div class="relative h-[500px]">
-                    <canvas id="gelarDistributionChart"></canvas>
+                    <canvas id="distributionChart"></canvas>
                 </div>
             </div>
         </div>
@@ -102,59 +96,75 @@
         Chart.register(ChartDataLabels);
 
         // --- GLOBAL VARIABLES ---
-        let lecturerCompositionChart, gelarDistributionChart;
+        let compositionChart, distributionChart;
+        let currentView = 'jabatan'; // 'jabatan' or 'gelar'
         
         // --- DATA SETUP ---
-        const labels = ['Adm. Bisnis', 'Akuntansi', 'DKV', 'ICT Business', 'Ilmu Komunikasi', 'Informatika', 'Sistem Informasi', 'Teknik Elektro', 'Teknik Industri', 'Teknik Telekomunikasi'];
+        const prodiLabels = ['Adm. Bisnis', 'Akuntansi', 'DKV', 'ICT Business', 'Ilmu Komunikasi', 'Informatika', 'Sistem Informasi', 'Teknik Elektro', 'Teknik Industri', 'Teknik Telekomunikasi'];
         
-        const dataGelar = {
-            'S1': [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-            'S2': [20, 26, 18, 18, 22, 17, 15, 11, 11, 18],
-            'S3': [30, 22, 15, 28, 18, 22, 12, 15, 14, 24]
-        };
+        const dataJabatan = { 'GB': [0, 0, 0, 1, 0, 1, 0, 0, 0, 0], 'LK': [4, 2, 0, 11, 3, 4, 2, 3, 0, 4], 'L': [14, 18, 8, 15, 11, 9, 5, 7, 11, 14], 'AA': [3, 6, 7, 3, 5, 7, 9, 3, 3, 3], 'NIFA': [14, 4, 6, 2, 9, 9, 8, 6, 5, 7] };
+        const dataGelar = { 'S1': [1, 2, 0, 1, 1, 5, 8, 4, 0, 7], 'S2': [8, 13, 5, 6, 6, 7, 4, 3, 3, 6], 'S3': [12, 13, 10, 23, 13, 14, 4, 9, 12, 14] };
 
-        const colors = {
-            'S1': '#ffcd56', // Yellow
-            'S2': '#36a2eb', // Blue
-            'S3': '#4bc0c0'  // Green
-        };
+        const colorsJabatan = { 'GB': '#ef4444', 'LK': '#f97316', 'L': '#84cc16', 'AA': '#3b82f6', 'NIFA': '#8b5cf6' };
+        const colorsGelar = { 'S1': '#ffcd56', 'S2': '#36a2eb', 'S3': '#4bc0c0' };
         
-        // --- CALCULATIONS FOR SUMMARY CARDS ---
-        const totalPerProdi = labels.map((_, i) => 
-            Object.values(dataGelar).reduce((sum, data) => sum + data[i], 0)
-        );
-        const grandTotal = totalPerProdi.reduce((sum, val) => sum + val, 0);
-        document.getElementById('total-dosen').textContent = grandTotal;
-        const maxDosenIndex = totalPerProdi.indexOf(Math.max(...totalPerProdi));
-        document.getElementById('top-prodi').textContent = labels[maxDosenIndex];
-        const totalPerGelar = Object.keys(dataGelar).map(key => 
-            dataGelar[key].reduce((sum, val) => sum + val, 0)
-        );
-        const maxGelarIndex = totalPerGelar.indexOf(Math.max(...totalPerGelar));
-        document.getElementById('top-gelar').textContent = Object.keys(dataGelar)[maxGelarIndex];
+        // --- DOM ELEMENTS ---
+        const btnJabatan = document.getElementById('btn-jabatan');
+        const btnGelar = document.getElementById('btn-gelar');
+        const colorContainer = document.getElementById('color-customization-container');
 
-        // --- FUNCTION TO RENDER CHARTS ---
-        function renderCharts() {
-            // --- CHART 1: HORIZONTAL STACKED BAR CHART ---
-            const datasets = Object.keys(dataGelar).map(key => ({
-                label: key,
-                data: dataGelar[key],
-                backgroundColor: colors[key],
-            }));
-            const ctxBar = document.getElementById('lecturerCompositionChart').getContext('2d');
-            lecturerCompositionChart = new Chart(ctxBar, {
+        // --- UPDATE & RENDER FUNCTIONS ---
+        function updateDashboard() {
+            const isJabatanView = currentView === 'jabatan';
+            const data = isJabatanView ? dataJabatan : dataGelar;
+            const colors = isJabatanView ? colorsJabatan : colorsGelar;
+            
+            // Update Summary Cards
+            const totalPerProdi = prodiLabels.map((_, i) => Object.values(data).reduce((sum, arr) => sum + arr[i], 0));
+            const grandTotal = totalPerProdi.reduce((sum, val) => sum + val, 0);
+            document.getElementById('total-dosen').textContent = grandTotal;
+            const maxDosenIndex = totalPerProdi.indexOf(Math.max(...totalPerProdi));
+            document.getElementById('top-prodi').textContent = prodiLabels[maxDosenIndex];
+            const totalPerCategory = Object.keys(data).map(key => data[key].reduce((sum, val) => sum + val, 0));
+            const maxCategoryIndex = totalPerCategory.indexOf(Math.max(...totalPerCategory));
+            document.getElementById('top-category').textContent = Object.keys(data)[maxCategoryIndex];
+            document.getElementById('top-category-title').textContent = isJabatanView ? 'Jabatan Paling Umum' : 'Gelar Paling Umum';
+            
+            // Update Chart Titles
+            document.getElementById('bar-chart-title').textContent = `Komposisi Dosen (${isJabatanView ? 'Jabatan' : 'Pendidikan'})`;
+            document.getElementById('pie-chart-title').textContent = `Distribusi Dosen (${isJabatanView ? 'Jabatan' : 'Pendidikan'})`;
+
+            // Update Color Pickers
+            updateColorPickersUI(data, colors);
+
+            // Render Charts
+            renderCharts(data, colors, totalPerCategory);
+        }
+
+        function renderCharts(data, colors, totalPerCategory) {
+            if (compositionChart) compositionChart.destroy();
+            if (distributionChart) distributionChart.destroy();
+            
+            const categoryLabels = Object.keys(data);
+
+            // Bar Chart
+            const ctxBar = document.getElementById('compositionChart').getContext('2d');
+            compositionChart = new Chart(ctxBar, {
                 type: 'bar',
-                data: { labels: labels, datasets: datasets },
+                data: { 
+                    labels: prodiLabels, 
+                    datasets: categoryLabels.map(key => ({
+                        label: key,
+                        data: data[key],
+                        backgroundColor: colors[key],
+                    }))
+                },
                 options: {
-                    indexAxis: 'y',
-                    responsive: true, maintainAspectRatio: false,
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'top', labels: { color: document.body.classList.contains('dark') ? '#E5E7EB' : '#4B5563' } },
                         tooltip: { mode: 'index' },
-                        datalabels: {
-                            color: '#ffffff', font: { weight: 'bold', size: 10 },
-                            formatter: (value) => (value > 0 ? value : '')
-                        }
+                        datalabels: { color: '#ffffff', font: { weight: 'bold', size: 10 }, formatter: (v) => (v > 0 ? v : '') }
                     },
                     scales: {
                         x: { stacked: true, grid: { color: 'rgba(128, 128, 128, 0.2)' }, ticks: { color: document.body.classList.contains('dark') ? '#9CA3AF' : '#6B7280' } },
@@ -163,18 +173,16 @@
                 }
             });
 
-            // --- CHART 2: PIE CHART ---
-            const ctxPie = document.getElementById('gelarDistributionChart').getContext('2d');
-            gelarDistributionChart = new Chart(ctxPie, {
+            // Doughnut Chart
+            const ctxPie = document.getElementById('distributionChart').getContext('2d');
+            distributionChart = new Chart(ctxPie, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(dataGelar),
+                    labels: categoryLabels,
                     datasets: [{
-                        label: 'Total Dosen',
-                        data: totalPerGelar,
+                        label: 'Total Dosen', data: totalPerCategory,
                         backgroundColor: Object.values(colors),
-                        borderColor: document.body.classList.contains('dark') ? '#1f2937' : '#ffffff',
-                        borderWidth: 3,
+                        borderColor: document.body.classList.contains('dark') ? '#1f2937' : '#ffffff', borderWidth: 3,
                     }]
                 },
                 options: {
@@ -183,10 +191,11 @@
                         legend: { position: 'bottom', labels: { color: document.body.classList.contains('dark') ? '#E5E7EB' : '#4B5563', padding: 15 } },
                         datalabels: {
                             color: '#ffffff', font: { weight: 'bold' },
-                            formatter: (value, context) => {
-                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const percentage = (value / total * 100).toFixed(1) + '%';
-                                return `${value}\n(${percentage})`;
+                            formatter: (v, ctx) => {
+                                if (v === 0) return '';
+                                const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const p = (v / total * 100).toFixed(1) + '%';
+                                return `${v}\n(${p})`;
                             },
                             textAlign: 'center'
                         }
@@ -194,50 +203,57 @@
                 }
             });
         }
-        
-        // --- SETUP COLOR PICKERS AND EVENT LISTENERS ---
-        function setupColorPickers() {
-            const colorPickerS1 = document.getElementById('s1-color-picker');
-            const colorPickerS2 = document.getElementById('s2-color-picker');
-            const colorPickerS3 = document.getElementById('s3-color-picker');
 
-            // Set initial values
-            colorPickerS1.value = colors['S1'];
-            colorPickerS2.value = colors['S2'];
-            colorPickerS3.value = colors['S3'];
+        function updateColorPickersUI(data, colors) {
+            const categoryLabels = Object.keys(data);
+            let html = `<h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 text-center">Kustomisasi Warna Grafik</h3>
+                        <div class="flex justify-center items-center flex-wrap gap-x-6 sm:gap-x-8 gap-y-4">`;
+            
+            categoryLabels.forEach(label => {
+                const id = label.toLowerCase().replace(/\s/g, '-');
+                html += `<div class="flex flex-col items-center">
+                            <label for="${id}-color-picker" class="font-semibold text-gray-700 dark:text-gray-300 mb-2">${label}</label>
+                            <input type="color" id="${id}-color-picker" class="color-picker-input" data-label="${label}" value="${colors[label]}">
+                         </div>`;
+            });
+            html += `</div>`;
+            colorContainer.innerHTML = html;
 
-            const updateChartColors = () => {
-                // Update bar chart datasets
-                lecturerCompositionChart.data.datasets.forEach(dataset => {
-                    dataset.backgroundColor = colors[dataset.label];
+            // Add event listeners to new color pickers
+            categoryLabels.forEach(label => {
+                const id = label.toLowerCase().replace(/\s/g, '-');
+                document.getElementById(`${id}-color-picker`).addEventListener('input', (e) => {
+                    const newColor = e.target.value;
+                    const dataLabel = e.target.getAttribute('data-label');
+                    if (currentView === 'jabatan') {
+                        colorsJabatan[dataLabel] = newColor;
+                    } else {
+                        colorsGelar[dataLabel] = newColor;
+                    }
+                    updateDashboard();
                 });
-                
-                // Update doughnut chart dataset
-                gelarDistributionChart.data.datasets[0].backgroundColor = Object.values(colors);
-
-                // Re-render charts
-                lecturerCompositionChart.update();
-                gelarDistributionChart.update();
-            };
-
-            colorPickerS1.addEventListener('input', (e) => {
-                colors['S1'] = e.target.value;
-                updateChartColors();
-            });
-            colorPickerS2.addEventListener('input', (e) => {
-                colors['S2'] = e.target.value;
-                updateChartColors();
-            });
-            colorPickerS3.addEventListener('input', (e) => {
-                colors['S3'] = e.target.value;
-                updateChartColors();
             });
         }
 
+        // --- EVENT LISTENERS ---
+        btnJabatan.addEventListener('click', () => {
+            currentView = 'jabatan';
+            btnJabatan.classList.add('active');
+            btnGelar.classList.remove('active');
+            updateDashboard();
+        });
+
+        btnGelar.addEventListener('click', () => {
+            currentView = 'gelar';
+            btnGelar.classList.add('active');
+            btnJabatan.classList.remove('active');
+            updateDashboard();
+        });
+
         // --- INITIALIZE ---
         window.onload = () => {
-            renderCharts();
-            setupColorPickers();
+            btnJabatan.classList.add('active'); // Set default view
+            updateDashboard();
         };
 
     </script>
