@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasbor Analisis Dosen Kelas Internasional 2024-2025</title>
+    <title>Dasbor Analisis Dosen & Mahasiswa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Plugin untuk menampilkan label data pada grafik -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
@@ -39,25 +39,36 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 md:p-8">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 sm:p-6 md:p-8 transition-colors duration-300">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-8 text-center">
-            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Dasbor Dosen Kelas Internasional</h1>
+        <div class="mb-8 text-center relative">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">Dasbor Analisis Dosen & Mahasiswa</h1>
             <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">Tahun Akademik 2024-2025</p>
+            
+            <!-- Dark Mode Toggle -->
+            <div class="absolute top-0 right-0 flex items-center space-x-2">
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                <label for="dark-mode-toggle" class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                </label>
+                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+            </div>
         </div>
 
         <!-- Filter Buttons -->
-        <div class="mb-8 flex justify-center items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1 max-w-md mx-auto">
-            <button id="btn-jabatan" class="filter-btn w-1/2 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Berdasarkan Jabatan</button>
-            <button id="btn-gelar" class="filter-btn w-1/2 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Berdasarkan Pendidikan</button>
+        <div class="mb-8 flex justify-center items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1 max-w-xl mx-auto">
+            <button id="btn-jabatan" class="filter-btn w-1/3 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Jabatan Dosen</button>
+            <button id="btn-gelar" class="filter-btn w-1/3 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Pendidikan Dosen</button>
+            <button id="btn-mahasiswa" class="filter-btn w-1/3 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Angkatan Mahasiswa</button>
         </div>
 
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md flex flex-col justify-center items-center">
-                <h3 class="text-gray-500 dark:text-gray-400 font-semibold text-lg">Total Dosen</h3>
-                <p id="total-dosen" class="text-4xl font-bold text-blue-600 dark:text-blue-400 mt-2">0</p>
+                <h3 id="total-title" class="text-gray-500 dark:text-gray-400 font-semibold text-lg">Total</h3>
+                <p id="total-count" class="text-4xl font-bold text-blue-600 dark:text-blue-400 mt-2">0</p>
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md flex flex-col justify-center items-center">
                 <h3 class="text-gray-500 dark:text-gray-400 font-semibold text-lg">Program Studi Teratas</h3>
@@ -76,14 +87,14 @@
 
         <!-- Main Charts Area -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
-                <h2 id="bar-chart-title" class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Komposisi Dosen</h2>
+            <div class="bg-white dark:bg-gray-800 lg:col-span-2 p-6 rounded-2xl shadow-md">
+                <h2 id="bar-chart-title" class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Komposisi</h2>
                 <div class="relative h-[500px]">
                     <canvas id="compositionChart"></canvas>
                 </div>
             </div>
             <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md">
-                 <h2 id="pie-chart-title" class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Distribusi Dosen</h2>
+                 <h2 id="pie-chart-title" class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Distribusi</h2>
                 <div class="relative h-[500px]">
                     <canvas id="distributionChart"></canvas>
                 </div>
@@ -97,42 +108,85 @@
 
         // --- GLOBAL VARIABLES ---
         let compositionChart, distributionChart;
-        let currentView = 'jabatan'; // 'jabatan' or 'gelar'
+        let currentView = 'jabatan'; // 'jabatan', 'gelar', or 'mahasiswa'
         
         // --- DATA SETUP ---
-        const prodiLabels = ['Adm. Bisnis', 'Akuntansi', 'DKV', 'ICT Business', 'Ilmu Komunikasi', 'Informatika', 'Sistem Informasi', 'Teknik Elektro', 'Teknik Industri', 'Teknik Telekomunikasi'];
+        const prodiLabels = ['Adm. Bisnis', 'Akuntansi', 'DKV', 'Ilmu Komunikasi', 'Informatika', 'ICT Business', 'Sistem Informasi', 'Teknik Elektro', 'Teknik Industri', 'Teknik Telekomunikasi'];
         
-        const dataJabatan = { 'GB': [0, 0, 0, 1, 0, 1, 0, 0, 0, 0], 'LK': [4, 2, 0, 11, 3, 4, 2, 3, 0, 4], 'L': [14, 18, 8, 15, 11, 9, 5, 7, 11, 14], 'AA': [3, 6, 7, 3, 5, 7, 9, 3, 3, 3], 'NIFA': [14, 4, 6, 2, 9, 9, 8, 6, 5, 7] };
-        const dataGelar = { 'S1': [1, 2, 0, 1, 1, 5, 8, 4, 0, 7], 'S2': [8, 13, 5, 6, 6, 7, 4, 3, 3, 6], 'S3': [12, 13, 10, 23, 13, 14, 4, 9, 12, 14] };
+        const dataJabatan = { 'GB': [0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 'LK': [4, 2, 0, 3, 4, 11, 2, 3, 0, 4], 'L': [14, 18, 8, 11, 9, 15, 5, 7, 11, 14], 'AA': [3, 6, 7, 5, 7, 3, 9, 3, 3, 3], 'NIFA': [14, 4, 6, 9, 9, 2, 8, 6, 5, 7] };
+        const dataGelar = { 'S1': [9, 2, 0, 9, 5, 2, 8, 4, 3, 7], 'S2': [8, 13, 5, 6, 7, 6, 4, 3, 3, 6], 'S3': [18, 9, 10, 13, 18, 23, 4, 10, 11, 13] };
+        const dataMahasiswa = { '2018': [0, 0, 0, 1, 0, 1, 0, 0, 0, 0], '2019': [0, 0, 0, 0, 3, 5, 2, 1, 0, 0], '2020': [0, 0, 3, 5, 2, 10, 1, 0, 1, 0], '2021': [5, 7, 18, 23, 17, 30, 6, 7, 5, 7], '2022': [30, 13, 16, 29, 31, 81, 29, 16, 23, 22], '2023': [19, 11, 17, 21, 28, 68, 25, 12, 15, 13], '2024': [30, 25, 20, 32, 34, 59, 33, 14, 34, 10] };
 
         const colorsJabatan = { 'GB': '#ef4444', 'LK': '#f97316', 'L': '#84cc16', 'AA': '#3b82f6', 'NIFA': '#8b5cf6' };
         const colorsGelar = { 'S1': '#ffcd56', 'S2': '#36a2eb', 'S3': '#4bc0c0' };
+        const colorsMahasiswa = { '2018': '#fde047', '2019': '#f97316', '2020': '#ef4444', '2021': '#84cc16', '2022': '#22c55e', '2023': '#3b82f6', '2024': '#8b5cf6' };
         
         // --- DOM ELEMENTS ---
         const btnJabatan = document.getElementById('btn-jabatan');
         const btnGelar = document.getElementById('btn-gelar');
+        const btnMahasiswa = document.getElementById('btn-mahasiswa');
         const colorContainer = document.getElementById('color-customization-container');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+        // --- HELPER FUNCTION ---
+        function getTextColorForBackground(hexColor) {
+            if (!hexColor) return '#FFFFFF'; // Default ke putih jika warna tidak ada
+            hexColor = hexColor.replace('#', '');
+            const r = parseInt(hexColor.substring(0, 2), 16);
+            const g = parseInt(hexColor.substring(2, 4), 16);
+            const b = parseInt(hexColor.substring(4, 6), 16);
+            const hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b));
+            // Threshold disesuaikan untuk kontras yang lebih baik pada warna-warna cerah
+            return hsp > 170 ? '#000000' : '#FFFFFF';
+        }
+
+        // --- THEME FUNCTIONS ---
+        const applyTheme = (isDark) => {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                Chart.defaults.color = '#E5E7EB';
+                Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+            } else {
+                document.documentElement.classList.remove('dark');
+                Chart.defaults.color = '#4B5563';
+                Chart.defaults.borderColor = 'rgba(0, 0, 0, 0.1)';
+            }
+            darkModeToggle.checked = isDark;
+            updateDashboard();
+        };
+
+        darkModeToggle.addEventListener('change', () => {
+            const isDark = darkModeToggle.checked;
+            localStorage.setItem('darkMode', isDark.toString());
+            applyTheme(isDark);
+        });
 
         // --- UPDATE & RENDER FUNCTIONS ---
         function updateDashboard() {
-            const isJabatanView = currentView === 'jabatan';
-            const data = isJabatanView ? dataJabatan : dataGelar;
-            const colors = isJabatanView ? colorsJabatan : colorsGelar;
+            let data, colors, viewName, totalTitle, categoryTitle;
+            if (currentView === 'jabatan') {
+                data = dataJabatan; colors = colorsJabatan; viewName = 'Jabatan Dosen'; totalTitle = 'Total Dosen'; categoryTitle = 'Jabatan Paling Umum';
+            } else if (currentView === 'gelar') {
+                data = dataGelar; colors = colorsGelar; viewName = 'Pendidikan Dosen'; totalTitle = 'Total Dosen'; categoryTitle = 'Gelar Paling Umum';
+            } else { // mahasiswa
+                data = dataMahasiswa; colors = colorsMahasiswa; viewName = 'Angkatan Mahasiswa'; totalTitle = 'Total Mahasiswa'; categoryTitle = 'Angkatan Terbanyak';
+            }
             
             // Update Summary Cards
             const totalPerProdi = prodiLabels.map((_, i) => Object.values(data).reduce((sum, arr) => sum + arr[i], 0));
             const grandTotal = totalPerProdi.reduce((sum, val) => sum + val, 0);
-            document.getElementById('total-dosen').textContent = grandTotal;
+            document.getElementById('total-count').textContent = grandTotal;
+            document.getElementById('total-title').textContent = totalTitle;
             const maxDosenIndex = totalPerProdi.indexOf(Math.max(...totalPerProdi));
             document.getElementById('top-prodi').textContent = prodiLabels[maxDosenIndex];
             const totalPerCategory = Object.keys(data).map(key => data[key].reduce((sum, val) => sum + val, 0));
             const maxCategoryIndex = totalPerCategory.indexOf(Math.max(...totalPerCategory));
             document.getElementById('top-category').textContent = Object.keys(data)[maxCategoryIndex];
-            document.getElementById('top-category-title').textContent = isJabatanView ? 'Jabatan Paling Umum' : 'Gelar Paling Umum';
+            document.getElementById('top-category-title').textContent = categoryTitle;
             
             // Update Chart Titles
-            document.getElementById('bar-chart-title').textContent = `Komposisi Dosen (${isJabatanView ? 'Jabatan' : 'Pendidikan'})`;
-            document.getElementById('pie-chart-title').textContent = `Distribusi Dosen (${isJabatanView ? 'Jabatan' : 'Pendidikan'})`;
+            document.getElementById('bar-chart-title').textContent = `Komposisi per Prodi (${viewName})`;
+            document.getElementById('pie-chart-title').textContent = `Distribusi Total (${viewName})`;
 
             // Update Color Pickers
             updateColorPickersUI(data, colors);
@@ -146,7 +200,7 @@
             if (distributionChart) distributionChart.destroy();
             
             const categoryLabels = Object.keys(data);
-
+            
             // Bar Chart
             const ctxBar = document.getElementById('compositionChart').getContext('2d');
             compositionChart = new Chart(ctxBar, {
@@ -154,21 +208,23 @@
                 data: { 
                     labels: prodiLabels, 
                     datasets: categoryLabels.map(key => ({
-                        label: key,
-                        data: data[key],
-                        backgroundColor: colors[key],
+                        label: key, data: data[key], backgroundColor: colors[key],
                     }))
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top', labels: { color: document.body.classList.contains('dark') ? '#E5E7EB' : '#4B5563' } },
+                        legend: { position: 'top' },
                         tooltip: { mode: 'index' },
-                        datalabels: { color: '#ffffff', font: { weight: 'bold', size: 10 }, formatter: (v) => (v > 0 ? v : '') }
+                        datalabels: {
+                            color: (context) => getTextColorForBackground(context.dataset.backgroundColor),
+                            font: { weight: 'bold', size: 10 },
+                            formatter: (v) => (v > 0 ? v : '')
+                        }
                     },
                     scales: {
-                        x: { stacked: true, grid: { color: 'rgba(128, 128, 128, 0.2)' }, ticks: { color: document.body.classList.contains('dark') ? '#9CA3AF' : '#6B7280' } },
-                        y: { stacked: true, grid: { display: false }, ticks: { color: document.body.classList.contains('dark') ? '#9CA3AF' : '#6B7280' } }
+                        x: { stacked: true },
+                        y: { stacked: true, grid: { display: false } }
                     }
                 }
             });
@@ -180,22 +236,26 @@
                 data: {
                     labels: categoryLabels,
                     datasets: [{
-                        label: 'Total Dosen', data: totalPerCategory,
+                        label: 'Total', data: totalPerCategory,
                         backgroundColor: Object.values(colors),
-                        borderColor: document.body.classList.contains('dark') ? '#1f2937' : '#ffffff', borderWidth: 3,
+                        borderColor: document.documentElement.classList.contains('dark') ? '#1f2937' : '#ffffff', borderWidth: 3,
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                     responsive: true, maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: document.body.classList.contains('dark') ? '#E5E7EB' : '#4B5563', padding: 15 } },
+                        legend: { position: 'bottom', labels: { padding: 15 } },
                         datalabels: {
-                            color: '#ffffff', font: { weight: 'bold' },
+                            color: (context) => getTextColorForBackground(context.dataset.backgroundColor[context.dataIndex]),
+                            font: { weight: 'bold' },
                             formatter: (v, ctx) => {
                                 if (v === 0) return '';
                                 const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-                                const p = (v / total * 100).toFixed(1) + '%';
-                                return `${v}\n(${p})`;
+                                const p = (v / total * 100);
+                                if (p < 7) { // Jika persentase kecil, hanya tampilkan angka
+                                    return v;
+                                }
+                                return `${v}\n(${p.toFixed(1)}%)`;
                             },
                             textAlign: 'center'
                         }
@@ -227,8 +287,10 @@
                     const dataLabel = e.target.getAttribute('data-label');
                     if (currentView === 'jabatan') {
                         colorsJabatan[dataLabel] = newColor;
-                    } else {
+                    } else if (currentView === 'gelar') {
                         colorsGelar[dataLabel] = newColor;
+                    } else {
+                        colorsMahasiswa[dataLabel] = newColor;
                     }
                     updateDashboard();
                 });
@@ -236,24 +298,37 @@
         }
 
         // --- EVENT LISTENERS ---
+        function setActiveButton(activeBtn) {
+            [btnJabatan, btnGelar, btnMahasiswa].forEach(btn => {
+                btn.classList.remove('active');
+            });
+            activeBtn.classList.add('active');
+        }
+
         btnJabatan.addEventListener('click', () => {
             currentView = 'jabatan';
-            btnJabatan.classList.add('active');
-            btnGelar.classList.remove('active');
+            setActiveButton(btnJabatan);
             updateDashboard();
         });
 
         btnGelar.addEventListener('click', () => {
             currentView = 'gelar';
-            btnGelar.classList.add('active');
-            btnJabatan.classList.remove('active');
+            setActiveButton(btnGelar);
+            updateDashboard();
+        });
+
+        btnMahasiswa.addEventListener('click', () => {
+            currentView = 'mahasiswa';
+            setActiveButton(btnMahasiswa);
             updateDashboard();
         });
 
         // --- INITIALIZE ---
         window.onload = () => {
-            btnJabatan.classList.add('active'); // Set default view
-            updateDashboard();
+            const savedThemeIsDark = localStorage.getItem('darkMode') === 'true';
+            applyTheme(savedThemeIsDark);
+
+            setActiveButton(btnJabatan); // Set default view
         };
 
     </script>
