@@ -58,10 +58,11 @@
         </div>
 
         <!-- Filter Buttons -->
-        <div class="mb-8 flex justify-center items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1 max-w-xl mx-auto">
-            <button id="btn-jabatan" class="filter-btn w-1/3 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Jabatan Dosen</button>
-            <button id="btn-gelar" class="filter-btn w-1/3 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Pendidikan Dosen</button>
-            <button id="btn-mahasiswa" class="filter-btn w-1/3 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Angkatan Mahasiswa</button>
+        <div class="mb-8 flex justify-center items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1 max-w-2xl mx-auto">
+            <button id="btn-jabatan" class="filter-btn w-1/4 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Jabatan Dosen</button>
+            <button id="btn-gelar" class="filter-btn w-1/4 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Pendidikan Dosen</button>
+            <button id="btn-mahasiswa" class="filter-btn w-1/4 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Mahasiswa Aktif</button>
+            <button id="btn-hms" class="filter-btn w-1/4 py-2 px-4 rounded-md text-sm sm:text-base font-semibold transition-colors duration-300">Mahasiswa (HMS)</button>
         </div>
 
         <!-- Summary Cards -->
@@ -108,25 +109,26 @@
 
         // --- GLOBAL VARIABLES ---
         let compositionChart, distributionChart;
-        let currentView = 'jabatan'; // 'jabatan', 'gelar', or 'mahasiswa'
+        let currentView = 'jabatan'; // 'jabatan', 'gelar', 'mahasiswa', or 'hms'
         
         // --- DATA SETUP ---
-        const prodiLabels = ['Adm. Bisnis', 'Akuntansi', 'DKV', 'Ilmu Komunikasi', 'Informatika', 'ICT Business', 'Sistem Informasi', 'Teknik Elektro', 'Teknik Industri', 'Teknik Telekomunikasi'];
+        const prodiLabels = ['Adm. Bisnis', 'Akuntansi', 'DKV', 'Ilmu Komunikasi', 'Informatika', 'ICT Business', 'Sistem Informasi', 'Teknik Elektro', 'Teknik Industri', 'Teknik Telekomunikasi', 'Teknologi Informasi'];
         
-        // DATA JABATAN DIPERBARUI: GB/LK DIPISAH
-        const dataJabatan = { 'Guru Besar': [0, 0, 0, 0, 1, 1, 0, 0, 0, 0], 'Lektor Kepala': [4, 2, 0, 3, 4, 10, 2, 3, 3, 4], 'Lektor': [11, 16, 8, 11, 9, 13, 5, 7, 9, 14], 'Asisten Ahli': [3, 4, 7, 5, 7, 3, 9, 3, 2, 3], 'NJFA': [10, 2, 6, 6, 7, 2, 8, 4, 5, 7] };
-        const dataGelar = { 'S2': [13, 17, 16, 17, 11, 7, 19, 6, 6, 14], 'S3': [15, 7, 5, 8, 17, 22, 5, 11, 13, 14] };
-        const dataMahasiswa = { '2018': [0, 0, 0, 1, 0, 1, 0, 0, 0, 0], '2019': [0, 0, 0, 0, 3, 5, 2, 1, 0, 0], '2020': [0, 0, 3, 5, 2, 10, 1, 0, 1, 0], '2021': [5, 7, 18, 23, 17, 30, 6, 7, 5, 7], '2022': [30, 13, 16, 29, 31, 81, 29, 16, 23, 22], '2023': [19, 11, 17, 21, 28, 68, 25, 12, 15, 13], '2024': [30, 25, 20, 32, 34, 59, 33, 14, 34, 10] };
+        const dataJabatan = { 'Guru Besar': [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0], 'Lektor Kepala': [4, 2, 0, 3, 4, 10, 2, 3, 3, 4, 0], 'Lektor': [11, 16, 8, 11, 9, 13, 5, 7, 9, 14, 0], 'Asisten Ahli': [3, 4, 7, 5, 7, 3, 9, 3, 2, 3, 0], 'NJFA': [10, 2, 6, 6, 7, 2, 8, 4, 5, 7, 0] };
+        const dataGelar = { 'S2': [13, 17, 16, 17, 11, 7, 19, 6, 6, 14, 0], 'S3': [15, 7, 5, 8, 17, 22, 5, 11, 13, 14, 0] };
+        const dataMahasiswa = { '2018': [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0], '2019': [0, 0, 0, 0, 3, 5, 2, 1, 0, 0, 0], '2020': [0, 0, 3, 5, 2, 10, 1, 0, 1, 0, 0], '2021': [5, 7, 18, 23, 17, 30, 6, 7, 5, 7, 0], '2022': [30, 13, 16, 29, 31, 81, 29, 16, 23, 22, 0], '2023': [19, 11, 17, 21, 28, 68, 25, 12, 15, 13, 0], '2024': [30, 25, 20, 32, 34, 59, 33, 14, 34, 10, 0], '2025': [27, 24, 10, 26, 27, 63, 26, 28, 31, 12, 17] };
+        const dataHms = { '2018': [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0], '2019': [0, 0, 0, 0, 3, 5, 2, 1, 0, 0, 0], '2020': [0, 0, 3, 5, 2, 10, 1, 0, 1, 0, 0] };
 
-        // WARNA JABATAN DIPERBARUI
         const colorsJabatan = { 'Guru Besar': '#991b1b', 'Lektor Kepala': '#ef4444', 'Lektor': '#f97316', 'Asisten Ahli': '#84cc16', 'NJFA': '#3b82f6' };
         const colorsGelar = { 'S2': '#36a2eb', 'S3': '#4bc0c0' };
-        const colorsMahasiswa = { '2018': '#fde047', '2019': '#f97316', '2020': '#ef4444', '2021': '#84cc16', '2022': '#22c55e', '2023': '#3b82f6', '2024': '#8b5cf6' };
+        const colorsMahasiswa = { '2018': '#fde047', '2019': '#f97316', '2020': '#ef4444', '2021': '#84cc16', '2022': '#22c55e', '2023': '#3b82f6', '2024': '#8b5cf6', '2025': '#14b8a6' };
+        const colorsHms = { '2018': '#fde047', '2019': '#f97316', '2020': '#ef4444' };
         
         // --- DOM ELEMENTS ---
         const btnJabatan = document.getElementById('btn-jabatan');
         const btnGelar = document.getElementById('btn-gelar');
         const btnMahasiswa = document.getElementById('btn-mahasiswa');
+        const btnHms = document.getElementById('btn-hms');
         const colorContainer = document.getElementById('color-customization-container');
         const darkModeToggle = document.getElementById('dark-mode-toggle');
 
@@ -169,8 +171,10 @@
                 data = dataJabatan; colors = colorsJabatan; viewName = 'Jabatan Dosen'; totalTitle = 'Total Dosen'; categoryTitle = 'Jabatan Paling Umum';
             } else if (currentView === 'gelar') {
                 data = dataGelar; colors = colorsGelar; viewName = 'Pendidikan Dosen'; totalTitle = 'Total Dosen'; categoryTitle = 'Gelar Paling Umum';
-            } else { // mahasiswa
+            } else if (currentView === 'mahasiswa') {
                 data = dataMahasiswa; colors = colorsMahasiswa; viewName = 'Angkatan Mahasiswa'; totalTitle = 'Total Mahasiswa'; categoryTitle = 'Angkatan Terbanyak';
+            } else { // hms
+                data = dataHms; colors = colorsHms; viewName = 'Mahasiswa (HMS)'; totalTitle = 'Total Mahasiswa (HMS)'; categoryTitle = 'Angkatan Terbanyak';
             }
             
             // Update Summary Cards
@@ -292,8 +296,10 @@
                         colorsJabatan[dataLabel] = newColor;
                     } else if (currentView === 'gelar') {
                         colorsGelar[dataLabel] = newColor;
-                    } else {
+                    } else if (currentView === 'mahasiswa') {
                         colorsMahasiswa[dataLabel] = newColor;
+                    } else { // hms
+                        colorsHms[dataLabel] = newColor;
                     }
                     updateDashboard();
                 });
@@ -302,7 +308,7 @@
 
         // --- EVENT LISTENERS ---
         function setActiveButton(activeBtn) {
-            [btnJabatan, btnGelar, btnMahasiswa].forEach(btn => {
+            [btnJabatan, btnGelar, btnMahasiswa, btnHms].forEach(btn => {
                 btn.classList.remove('active');
             });
             activeBtn.classList.add('active');
@@ -323,6 +329,12 @@
         btnMahasiswa.addEventListener('click', () => {
             currentView = 'mahasiswa';
             setActiveButton(btnMahasiswa);
+            updateDashboard();
+        });
+        
+        btnHms.addEventListener('click', () => {
+            currentView = 'hms';
+            setActiveButton(btnHms);
             updateDashboard();
         });
 
